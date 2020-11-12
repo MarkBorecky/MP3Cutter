@@ -13,32 +13,36 @@ import org.jfree.data.xy.XYSeriesCollection;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class Test2 {
-    final static String source = "mp3/100SLOWEK.mp3";
+    final static String source = "mp3/2part";
     final static String destination = "result/";
     final static double cutOff = 64_000;
 
     public static void main(String[] args) throws IOException {
-        Mp3File file = new Mp3File(new FileInputStream(new File(source)).readAllBytes());
+        List<String> words = Files.readAllLines(Paths.get(source+".txt"), StandardCharsets.UTF_8);
+        Mp3File file = new Mp3File(new FileInputStream(new File(source+".mp3")).readAllBytes());
         createChart(file);
         List<byte[]> subFiles = file.getSubFiles();
         subFiles.forEach(x-> System.out.println("length "+x.length));
-        saveFiles(subFiles);
+        saveFiles(subFiles, words);
     }
 
-    private static void saveFiles(List<byte[]> files) throws IOException {
+
+    private static void saveFiles(List<byte[]> files, List<String> words) throws IOException {
         File dir = new File(destination);
         if (!dir.exists())
             dir.mkdir();
         System.out.printf("files amount %d\n", files.size());
         for (int i = 0; i < files.size(); i++) {
-            var path = destination + i + ".mp3";
+            var path = destination + words.get(i) + ".mp3";
             Files.write(new File(path).toPath(), files.get(i));
         }
     }
